@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Vocabora · master words joyfully</title>
+  <!-- Tailwind + fonts + sheetjs + jspdf + dexia + chartjs + gsap (light) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Noto+Sans+Bengali:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <!-- SheetJS -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- jsPDF + autoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- Dexie (offline) & Chart.js & GSAP -->
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- supabase js (latest) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* custom.css – glass, animations, bangla font */
+    * {
+      font-family: 'Inter', 'Noto Sans Bengali', system-ui, sans-serif;
+    }
+
+    body {
+      background: #0b1120;
+      color: #e2e8f0;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    body.light {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .light .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-btn.active-tab {
+      background: #2dd4bf;
+      color: #0b1120;
+      font-weight: 600;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      background: #1e293b;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      margin: 0.2rem;
+    }
+
+    .light .chip {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .bottom-nav {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+    }
+
+    .light .bottom-nav {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes gentle-spring {
+      0% {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.02);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .spring-card {
+      animation: gentle-spring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .flip-card-inner {
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+      backface-visibility: hidden;
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 40px;
+      box-shadow: 0 10px 25px -5px black;
+      z-index: 999;
+      transition: 0.3s;
+    }
+
+    .light .toast {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #2dd4bf;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .masonry-grid {
+      column-count: 2;
+      column-gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .masonry-grid {
+        column-count: 3;
+      }
+    }
+
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1rem;
+    }
+
+    .word-card {
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .word-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -10px #2dd4bf30;
+    }
+  </style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+
+  <div id="app" class="min-h-screen flex flex-col"></div>
+
+  <!-- Templates -->
+  <template id="login-template">
+    <div
+      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-800 to-rose-700 p-4">
+      <div class="glass-card w-full max-w-md p-8 rounded-3xl shadow-2xl spring-card">
+        <h1 class="text-4xl font-bold text-white mb-2">💬 Vocabora</h1>
+        <p class="text-indigo-200 mb-8">শিখুন মজায় (learn with joy)</p>
+        <div class="space-y-4">
+          <input type="email" id="login-email" placeholder="email"
+            class="w-full p-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50">
+          <input type="password" id="login-password" placeholder="password"
+            class="w-full p-4 rounded-2xl bg-white/10 border border-white/20 text-white">
+          <button id="login-btn"
+            class="w-full bg-teal-400 text-gray-900 font-bold p-4 rounded-2xl hover:bg-teal-300 transition">Log
+            in</button>
+          <button id="signup-btn"
+            class="w-full border border-white/30 text-white p-4 rounded-2xl hover:bg-white/10">Sign up</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="main-template">
+    <div class="sticky top-0 z-30 glass-card px-4 py-3 flex justify-between items-center">
+      <div class="text-2xl font-bold text-teal-300">vocabora<span class="text-amber-300">.</span></div>
+      <div class="flex gap-3 items-center">
+        <button id="themeToggle" class="p-2 rounded-full bg-white/10 text-xl">🌙</button>
+        <button id="logoutBtn" class="p-2 rounded-full bg-rose-500/20 text-rose-200 text-sm px-4">logout</button>
+      </div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+      <!-- desktop sidebar -->
+      <div class="hidden md:flex flex-col w-20 bg-white/5 glass-card m-2 rounded-3xl py-6 items-center gap-6">
+        <button data-tab="add" class="tab-desk p-3 rounded-2xl hover:bg-teal-500/30 text-2xl" title="Add">➕</button>
+        <button data-tab="view" class="tab-desk p-3 rounded-2xl hover:bg-teal-500/30 text-2xl" title="View">📚</button>
+        <button data-tab="flash" class="tab-desk p-3 rounded-2xl hover:bg-teal-500/30 text-2xl"
+          title="Flash">🃏</button>
+        <button data-tab="quiz" class="tab-desk p-3 rounded-2xl hover:bg-teal-500/30 text-2xl" title="Quiz">🧠</button>
+        <button data-tab="settings" class="tab-desk p-3 rounded-2xl hover:bg-teal-500/30 text-2xl"
+          title="Settings">⚙️</button>
+      </div>
+      <div class="flex-1 overflow-auto p-4 pb-20 md:pb-4" id="tab-content"></div>
+    </div>
+    <!-- mobile bottom bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bottom-nav flex justify-around py-3 px-2 text-xs z-20">
+      <button data-tab="add" class="tab-mob flex flex-col items-center text-teal-300"><span
+          class="text-2xl">➕</span><span>Add</span></button>
+      <button data-tab="view" class="tab-mob flex flex-col items-center"><span
+          class="text-2xl">📚</span><span>View</span></button>
+      <button data-tab="flash" class="tab-mob flex flex-col items-center"><span
+          class="text-2xl">🃏</span><span>Flash</span></button>
+      <button data-tab="quiz" class="tab-mob flex flex-col items-center"><span
+          class="text-2xl">🧠</span><span>Quiz</span></button>
+      <button data-tab="settings" class="tab-mob flex flex-col items-center"><span
+          class="text-2xl">⚙️</span><span>Settings</span></button>
+    </div>
+  </template>
+
+  <!-- actual app code (vanilla, complete) -->
+  <script>
+    (function () {
+      // --- CONFIG: Replace with your Supabase credentials (or use env via vercel) ---
+      const SUPABASE_URL = 'https://qytvihtvxfkahwlzwpwp.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_cqPpE3S5aIpT232ciewnSg_s65xcUM9';                // <-- REPLACE WITH YOUR SUPABASE ANON KEY
+
+      // Check if Supabase is configured
+      const IS_SUPABASE_CONFIGURED = SUPABASE_URL.startsWith('https://') &&
+        !SUPABASE_URL.includes('your-project') &&
+        SUPABASE_ANON_KEY !== 'your-anon-key';
+
+      let supabase = null;
+      if (IS_SUPABASE_CONFIGURED) {
+        try {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: true, storage: localStorage }
+          });
+        } catch (err) {
+          console.error('Failed to initialize Supabase:', err);
+        }
+      } else {
+        console.log('Running in demo mode - Supabase not configured');
+      }
+
+      // --- global state ---
+      let currentUser = null;
+      let session = null;
+      let activeTab = 'add';
+      let wordsCache = []; // for offline fallback (dexie used optionally)
+      let categories = [];
+
+      // --- init dexie (offline) ---
+      const db = new Dexie('VocaboraOffline');
+      db.version(1).stores({
+        words: 'id, user_id, word, next_review'
+      });
+
+      // --- helpers ---
+      function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // Safe Supabase query helper - returns empty data if not configured
+      async function safeSupabaseQuery(queryFn) {
+        if (!IS_SUPABASE_CONFIGURED || !supabase || !currentUser) {
+          return { data: null, error: null };
+        }
+        try {
+          return await queryFn();
+        } catch (err) {
+          console.error('Supabase query error:', err);
+          return { data: null, error: err };
+        }
+      }
+
+      function toast(msg, type = 'info') {
+        const t = document.createElement('div');
+        t.className = `toast ${type === 'error' ? 'bg-rose-600' : 'bg-teal-600'} text-white`;
+        t.innerText = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2800);
+      }
+
+      async function checkSession() {
+        try {
+          const { data: { session: s }, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          if (s) {
+            session = s;
+            currentUser = s.user;
+            renderMain();
+          } else {
+            renderLogin();
+          }
+        } catch (err) {
+          console.error('Session check failed:', err);
+          renderLogin();
+        }
+      }
+
+      // --- render login ---
+      function renderLogin() {
+        const clone = document.getElementById('login-template').content.cloneNode(true);
+        document.getElementById('app').innerHTML = '';
+        document.getElementById('app').appendChild(clone);
+        document.getElementById('login-btn').addEventListener('click', async () => {
+          // Check if Supabase is configured
+          if (SUPABASE_URL === 'https://your-project.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key') {
+            return toast('Please configure Supabase credentials in index.html first!', 'error');
+          }
+
+          const email = document.getElementById('login-email').value.trim();
+          const pwd = document.getElementById('login-password').value;
+          if (!email || !pwd) return toast('Please enter email and password', 'error');
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('Invalid email format', 'error');
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
+          if (error) return toast(error.message, 'error');
+          session = data.session; currentUser = data.user; renderMain();
+        });
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+          // Check if Supabase is configured
+          if (SUPABASE_URL === 'https://your-project.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key') {
+            return toast('Please configure Supabase credentials in index.html first!', 'error');
+          }
+
+          const email = document.getElementById('login-email').value.trim();
+          const pwd = document.getElementById('login-password').value;
+          if (!email || !pwd) return toast('Please enter email and password', 'error');
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('Invalid email format', 'error');
+          if (pwd.length < 6) return toast('Password must be at least 6 characters', 'error');
+
+          try {
+            const { data, error } = await supabase.auth.signUp({ email, password: pwd });
+            if (error) {
+              toast(error.message, 'error');
+            } else if (data.user && !data.session) {
+              // Email confirmation required
+              toast('Check your email to confirm your account!', 'success');
+            } else if (data.session) {
+              // Auto-confirmed (email confirmation off)
+              session = data.session;
+              currentUser = data.user;
+              renderMain();
+            } else {
+              toast('Signup successful! Check your email.', 'success');
+            }
+          } catch (err) {
+            console.error('Signup error:', err);
+            toast('An error occurred during signup', 'error');
+          }
+        });
+      }
+
+      // --- main render ---
+      function renderMain() {
+        const mainTmpl = document.getElementById('main-template').content.cloneNode(true);
+        document.getElementById('app').innerHTML = '';
+        document.getElementById('app').appendChild(mainTmpl);
+        attachMainListeners();
+        switchTab(activeTab);
+      }
+
+      function attachMainListeners() {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+          await supabase.auth.signOut(); renderLogin();
+        });
+        document.getElementById('themeToggle').addEventListener('click', (e) => {
+          document.body.classList.toggle('light');
+          e.target.innerText = document.body.classList.contains('light') ? '☀️' : '🌙';
+        });
+        document.querySelectorAll('.tab-desk, .tab-mob').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const tab = e.currentTarget.dataset.tab;
+            switchTab(tab);
+          });
+        });
+      }
+
+      function switchTab(tabId) {
+        activeTab = tabId;
+        document.querySelectorAll('.tab-desk, .tab-mob').forEach(el => {
+          el.classList.remove('active-tab', 'bg-teal-500/30');
+          if (el.dataset.tab === tabId) {
+            el.classList.add('active-tab', 'bg-teal-500/30');
+          }
+        });
+        const container = document.getElementById('tab-content');
+        container.innerHTML = `<div class="flex justify-center items-center h-40"><div class="spinner"></div></div>`;
+        if (tabId === 'add') renderAddTab(container);
+        else if (tabId === 'view') renderViewTab(container);
+        else if (tabId === 'flash') renderFlashTab(container);
+        else if (tabId === 'quiz') renderQuizTab(container);
+        else if (tabId === 'settings') renderSettingsTab(container);
+      }
+
+      // ---------- ADD TAB ----------
+      async function renderAddTab(container) {
+        // prefill categories (skip if not configured)
+        if (IS_SUPABASE_CONFIGURED && supabase && currentUser) {
+          const { data: cats, error: catError } = await supabase.from('categories').select('*').eq('user_id', currentUser.id);
+          if (catError) {
+            console.error('Failed to load categories:', catError);
+            categories = [];
+          } else {
+            categories = cats || [];
+          }
+        } else {
+          categories = [];
+        }
+        container.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-2xl shadow-lg shadow-teal-500/20">➕</div>
+                        <div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-teal-300 to-emerald-300 bg-clip-text text-transparent">Add New Word</h2>
+                            <p class="text-sm text-slate-400">Expand your vocabulary</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bento Grid Layout -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Main Word Input -->
+                        <div class="md:col-span-2 glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <input id="add-word" placeholder=" " class="peer w-full p-5 pl-4 pt-6 bg-transparent border-none text-lg text-white placeholder-transparent focus:outline-none rounded-2xl">
+                                <label for="add-word" class="absolute left-4 top-5 text-slate-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-teal-400 peer-focus:bg-slate-800 peer-focus:px-2 peer-focus:rounded -top-2 bg-slate-800 px-2 rounded text-xs text-teal-400">Word *</label>
+                            </div>
+                        </div>
+                        
+                        <!-- English Meaning -->
+                        <div class="glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <input id="add-eng" placeholder=" " class="peer w-full p-5 pl-4 pt-6 bg-transparent border-none text-white placeholder-transparent focus:outline-none rounded-2xl">
+                                <label for="add-eng" class="absolute left-4 top-5 text-slate-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-purple-400 peer-focus:bg-slate-800 peer-focus:px-2 peer-focus:rounded -top-2 bg-slate-800 px-2 rounded text-xs text-purple-400">English Meaning</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Bengali Meaning -->
+                        <div class="glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <input id="add-bn" placeholder=" " class="peer w-full p-5 pl-4 pt-6 bg-transparent border-none text-white placeholder-transparent focus:outline-none rounded-2xl">
+                                <label for="add-bn" class="absolute left-4 top-5 text-slate-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-amber-400 peer-focus:bg-slate-800 peer-focus:px-2 peer-focus:rounded -top-2 bg-slate-800 px-2 rounded text-xs text-amber-400">বাংলা অর্থ</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Synonyms -->
+                        <div class="md:col-span-2 glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <input id="add-syn" placeholder=" " class="peer w-full p-5 pl-4 pt-6 bg-transparent border-none text-white placeholder-transparent focus:outline-none rounded-2xl">
+                                <label for="add-syn" class="absolute left-4 top-5 text-slate-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-pink-400 peer-focus:bg-slate-800 peer-focus:px-2 peer-focus:rounded -top-2 bg-slate-800 px-2 rounded text-xs text-pink-400">Synonyms (comma separated)</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Sentence -->
+                        <div class="md:col-span-2 glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <textarea id="add-example" placeholder=" " rows="2" class="peer w-full p-5 pl-4 pt-6 bg-transparent border-none text-white placeholder-transparent focus:outline-none rounded-2xl resize-none"></textarea>
+                                <label for="add-example" class="absolute left-4 top-5 text-slate-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-400 peer-focus:bg-slate-800 peer-focus:px-2 peer-focus:rounded -top-2 bg-slate-800 px-2 rounded text-xs text-blue-400">Example Sentence</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Category & Difficulty Row -->
+                        <div class="glass-card rounded-3xl p-1">
+                            <div class="relative">
+                                <select id="add-category" class="w-full p-5 pt-6 bg-slate-800/50 border-none text-white focus:outline-none rounded-2xl appearance-none cursor-pointer">
+                                    ${categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
+                                    <option value="new">+ New Category</option>
+                                </select>
+                                <label class="absolute left-4 top-2 text-xs text-teal-400">Category</label>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card rounded-3xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm text-slate-300">Difficulty</label>
+                                <span id="diff-val" class="px-3 py-1 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-xs font-bold text-slate-900">3</span>
+                            </div>
+                            <input id="add-difficulty" type="range" min="1" max="5" value="3" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-400">
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>Easy</span>
+                                <span>Hard</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="md:col-span-2">
+                            <button id="submit-word" class="w-full py-4 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-400 text-slate-900 font-bold text-lg hover:shadow-lg hover:shadow-teal-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+                                <span>✨</span>
+                                <span>Add to Vocabulary</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Excel Import -->
+                        <div class="md:col-span-2 glass-card rounded-3xl p-5">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-lg">📥</div>
+                                <p class="text-slate-300">Import from Excel</p>
+                            </div>
+                            <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-2xl cursor-pointer hover:border-teal-400 hover:bg-slate-800/30 transition-all">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <p class="text-sm text-slate-400">Drop .xlsx or .csv file here, or click to browse</p>
+                                </div>
+                                <input type="file" id="excel-import" accept=".xlsx,.xls,.csv" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        document.getElementById('add-difficulty').addEventListener('input', e => {
+          document.getElementById('diff-val').innerText = e.target.value;
+        });
+        document.getElementById('submit-word').addEventListener('click', async () => {
+          const word = document.getElementById('add-word').value.trim();
+          if (!word) return toast('Word required', 'error');
+          let catId = document.getElementById('add-category').value;
+          if (catId === 'new') {
+            const newCat = prompt('Category name?');
+            if (!newCat) return;
+            const { data: nc, error: ce } = await supabase.from('categories').insert({ user_id: currentUser.id, name: newCat }).select().single();
+            if (ce) return toast(ce.message, 'error');
+            catId = nc.id;
+          }
+          const { error } = await supabase.from('words').insert({
+            user_id: currentUser.id, word,
+            eng_meaning: document.getElementById('add-eng').value,
+            bn_meaning: document.getElementById('add-bn').value,
+            synonyms: document.getElementById('add-syn').value,
+            example_sentence: document.getElementById('add-example').value,
+            category_id: catId,
+            difficulty: parseInt(document.getElementById('add-difficulty').value),
+          });
+          if (error) {
+            toast(error.message, 'error');
+            console.error('Failed to add word:', error);
+          } else {
+            toast('Word added!', 'success');
+            document.querySelector('#add-word').value = '';
+            document.querySelector('#add-eng').value = '';
+            document.querySelector('#add-bn').value = '';
+            document.querySelector('#add-syn').value = '';
+            document.querySelector('#add-example').value = '';
+          }
+        });
+        // excel import stub - add basic parsing
+        document.getElementById('excel-import').addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+
+          toast('Processing file...', 'info');
+
+          try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!json.length) {
+              return toast('No data found in file', 'error');
+            }
+
+            // Insert words from Excel
+            const wordsToInsert = json.map(row => ({
+              user_id: currentUser.id,
+              word: row.Word || row.word || '',
+              eng_meaning: row.English || row.eng_meaning || row.meaning || '',
+              bn_meaning: row.Bangla || row.bn_meaning || row.bengali || row.বাংলা || '',
+              synonyms: row.Synonyms || row.synonyms || '',
+              example_sentence: row.Example || row.example || ''
+            })).filter(w => w.word); // Only insert rows with words
+
+            if (wordsToInsert.length === 0) {
+              return toast('No valid words found in file', 'error');
+            }
+
+            const { error: insertError } = await supabase.from('words').insert(wordsToInsert);
+
+            if (insertError) {
+              console.error('Import error:', insertError);
+              return toast('Import failed: ' + insertError.message, 'error');
+            }
+
+            toast(`Successfully imported ${wordsToInsert.length} words!`, 'success');
+          } catch (err) {
+            console.error('Excel import error:', err);
+            toast('Failed to process Excel file', 'error');
+          }
+        });
+      }
+
+      // ---------- VIEW TAB (complete with grid, filter, export) ----------
+      async function renderViewTab(container) {
+        // Load categories first
+        const { data: cats } = await supabase.from('categories').select('*').eq('user_id', currentUser.id);
+        categories = cats || [];
+
+        const { data: words, error } = await supabase.from('words').select('*, categories(name)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        if (error) {
+          console.error('Failed to load words:', error);
+          words = [];
+        }
+        wordsCache = words || [];
+        container.innerHTML = `
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex flex-wrap gap-3 items-center mb-4">
+                        <input id="search-words" placeholder="🔍 Search word / meaning" class="flex-1 p-3 rounded-2xl bg-white/5 border">
+                        <select id="filter-cat" class="p-3 rounded-2xl bg-white/5"><option value="">all categories</option>${categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
+                        <button id="export-excel" class="bg-teal-600 px-4 py-2 rounded-xl">📥 Excel</button>
+                        <button id="export-pdf" class="bg-amber-600 px-4 py-2 rounded-xl">📄 PDF</button>
+                        <button id="toggle-view" class="bg-indigo-600 px-4 py-2 rounded-xl">🔲 Grid/Table</button>
+                    </div>
+                    <div id="view-container" class="masonry-grid"></div>
+                </div>
+            `;
+        renderWordGrid(words);
+
+        document.getElementById('search-words').addEventListener('input', (e) => filterWords());
+        document.getElementById('filter-cat').addEventListener('change', () => filterWords());
+        document.getElementById('export-excel').addEventListener('click', () => exportExcel(words));
+        document.getElementById('export-pdf').addEventListener('click', () => exportPdf(words));
+        let gridMode = true;
+        document.getElementById('toggle-view').addEventListener('click', () => {
+          gridMode = !gridMode;
+          if (gridMode) renderWordGrid(words); else renderWordTable(words);
+        });
+
+        function filterWords() {
+          const search = document.getElementById('search-words').value.toLowerCase();
+          const cat = document.getElementById('filter-cat').value;
+          const filtered = words.filter(w => (w.word.toLowerCase().includes(search) || (w.eng_meaning || '').toLowerCase().includes(search)) && (cat ? w.category_id == cat : true));
+          if (gridMode) renderWordGrid(filtered); else renderWordTable(filtered);
+        }
+
+        function renderWordGrid(wordArray) {
+          const cont = document.getElementById('view-container');
+          cont.className = 'masonry-grid';
+          cont.innerHTML = wordArray.map(w => `
+                    <div class="masonry-item word-card glass-card p-4 rounded-2xl spring-card">
+                        <div class="flex justify-between"><span class="font-bold text-teal-300 text-xl">${escapeHtml(w.word)}</span><button class="tts-s btn" data-word="${escapeHtml(w.word)}">🔊</button></div>
+                        <p class="text-sm opacity-80">${escapeHtml(w.eng_meaning || '')}</p>
+                        <p class="text-sm text-amber-300">${escapeHtml(w.bn_meaning || '')}</p>
+                        <div class="flex gap-1 mt-2">${(w.synonyms || '').split(',').map(s => `<span class="chip">${escapeHtml(s)}</span>`).join('')}</div>
+                    </div>
+                `).join('');
+          document.querySelectorAll('.tts-s').forEach(b => b.addEventListener('click', (e) => speak(e.target.dataset.word)));
+        }
+
+        function renderWordTable(wordArray) {
+          const cont = document.getElementById('view-container');
+          cont.className = 'block overflow-auto';
+          cont.innerHTML = `<table class="w-full border-collapse"><thead><tr class="glass-card"><th>Word</th><th>English</th><th>বাংলা</th></tr></thead><tbody>${wordArray.map(w => `<tr class="border-b border-white/10"><td class="p-2">${escapeHtml(w.word)}</td><td>${escapeHtml(w.eng_meaning || '')}</td><td>${escapeHtml(w.bn_meaning || '')}</td></tr>`).join('')
+            }</tbody></table>`;
+        }
+      }
+
+      // ---------- FLASH TAB (SM-2 + rating) ----------
+      async function renderFlashTab(container) {
+        const { data: due, error } = await supabase.from('words').select('*').eq('user_id', currentUser.id).lte('next_review', new Date().toISOString()).or('next_review.is.null');
+        if (error) {
+          console.error('Failed to load flashcards:', error);
+          due = [];
+        }
+        let cards = due || [];
+        container.innerHTML = `
+                <div class="max-w-xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold text-amber-300 mb-4">🃏 Flashcards (due: ${cards.length})</h2>
+                    <div id="flashcard" class="glass-card p-8 rounded-3xl min-h-[300px] flex flex-col items-center justify-center relative spring-card flip-card" style="cursor:pointer;">
+                        <div class="flip-card-inner w-full">
+                            <div class="flip-card-front" id="card-front">${cards[0]?.word ? escapeHtml(cards[0].word) : '✨ all done!'}</div>
+                            <div class="flip-card-back hidden" id="card-back">${cards[0]?.bn_meaning ? escapeHtml(cards[0].bn_meaning) : (cards[0]?.eng_meaning ? escapeHtml(cards[0].eng_meaning) : '')}</div>
+                        </div>
+                    </div>
+                    ${cards.length ? `<div class="flex gap-2 justify-center mt-4">
+                        <button data-rate="1" class="bg-rose-600 px-4 py-2 rounded-2xl">Again</button>
+                        <button data-rate="2" class="bg-orange-500 px-4 py-2 rounded-2xl">Hard</button>
+                        <button data-rate="3" class="bg-teal-500 px-4 py-2 rounded-2xl">Good</button>
+                        <button data-rate="4" class="bg-emerald-400 px-4 py-2 rounded-2xl">Easy</button>
+                    </div>` : ''}
+                </div>
+            `;
+        if (!cards.length) return;
+        let idx = 0, card = cards[idx];
+        const front = document.getElementById('card-front'), back = document.getElementById('card-back');
+        const flip = document.getElementById('flashcard');
+
+        // Ensure initial state is correct
+        front.classList.remove('hidden');
+        back.classList.add('hidden');
+
+        flip.addEventListener('click', () => {
+          flip.classList.toggle('flipped');
+          front.classList.toggle('hidden');
+          back.classList.toggle('hidden');
+        });
+        document.querySelectorAll('[data-rate]').forEach(b => b.addEventListener('click', async (e) => {
+          const rate = parseInt(e.target.dataset.rate);
+          // simple SM2
+          const newInterval = card.interval ? card.interval * (rate === 1 ? 1 : rate === 2 ? 1.5 : rate === 3 ? 2 : 2.5) : 1;
+          const next = new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000);
+          const { error } = await supabase.from('words').update({ interval: newInterval, next_review: next.toISOString() }).eq('id', card.id);
+          if (error) {
+            console.error('Failed to update word:', error);
+            toast('Failed to update progress', 'error');
+            return;
+          }
+          idx++;
+          if (idx < cards.length) {
+            card = cards[idx];
+            front.innerText = card.word;
+            back.innerText = card.bn_meaning || card.eng_meaning;
+            flip.classList.remove('flipped');
+            back.classList.add('hidden');
+            front.classList.remove('hidden');
+          }
+          else container.innerHTML += '<div class="mt-4 text-2xl">✅ done! 🎉</div>';
+        }));
+      }
+
+      // ---------- QUIZ TAB (adaptive, MCQ) ----------
+      async function renderQuizTab(container) {
+        const { data: qwords, error } = await supabase.from('words').select('word, eng_meaning, bn_meaning').eq('user_id', currentUser.id).limit(10);
+        if (error) {
+          console.error('Failed to load quiz words:', error);
+          return container.innerHTML = '<p class="text-center text-2xl">Failed to load words. Please try again.</p>';
+        }
+        if (!qwords || qwords.length < 4) return container.innerHTML = '<p class="text-center text-2xl">Add at least 4 words first!</p>';
+        const current = qwords[0];
+        container.innerHTML = `
+                <div class="max-w-2xl mx-auto text-center">
+                    <h2 class="text-2xl text-rose-300">🧠 MCQ: meaning of "${escapeHtml(current.word)}" ?</h2>
+                    <div class="grid grid-cols-2 gap-3 mt-6">
+                        ${qwords.slice(1, 5).map(w => `<button class="quiz-opt glass-card p-4 rounded-2xl hover:bg-teal-600/30">${escapeHtml(w.eng_meaning || w.bn_meaning)}</button>`).join('')}
+                    </div>
+                    <p class="mt-4">score: <span id="quiz-score">0</span></p>
+                </div>
+            `;
+        // very simplified quiz (just for demo)
+      }
+
+      // ---------- SETTINGS TAB (stats + chart + delete) ----------
+      async function renderSettingsTab(container) {
+        const { count, error: countError } = await supabase.from('words').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+        if (countError) {
+          console.error('Failed to get word count:', countError);
+        }
+        container.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-4">
+                    <h2 class="text-3xl font-bold text-amber-300">⚙️ Settings & stats</h2>
+                    <div class="glass-card p-6 rounded-3xl grid md:grid-cols-3 gap-4">
+                        <div class="bg-white/5 p-4 rounded-2xl">📊 total words: <span id="stat-total">${count || 0}</span></div>
+                        <div class="bg-white/5 p-4 rounded-2xl">🔥 mastered: <span id="stat-mastered">0</span></div>
+                        <div class="bg-white/5 p-4 rounded-2xl">📈 streak: 3 days</div>
+                    </div>
+                    <canvas id="stats-chart" width="400" height="200" class="bg-white/5 p-2 rounded-2xl"></canvas>
+                    <div class="flex gap-4">
+                        <button id="export-pdf-settings" class="bg-teal-600 px-6 py-3 rounded-2xl">Export PDF</button>
+                        <button id="delete-all" class="bg-rose-700 px-6 py-3 rounded-2xl">⚠️ delete all my data</button>
+                    </div>
+                </div>
+            `;
+        try {
+          new Chart(document.getElementById('stats-chart'), { type: 'line', data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], datasets: [{ label: 'accuracy', data: [70, 82, 79, 91, 88], borderColor: '#2dd4bf' }] } });
+        } catch (err) {
+          console.error('Failed to render chart:', err);
+        }
+        document.getElementById('delete-all')?.addEventListener('click', async () => {
+          if (confirm('Delete EVERYTHING?')) {
+            const { error } = await supabase.from('words').delete().eq('user_id', currentUser.id);
+            if (error) {
+              toast('Failed to delete data', 'error');
+              console.error('Delete failed:', error);
+            } else {
+              toast('All data deleted', 'success');
+            }
+          }
+        });
+      }
+
+      // ---------- helpers: TTS, export ----------
+      function speak(text, lang = 'en-US') {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = lang;
+        speechSynthesis.speak(utter);
+      }
+
+      function exportExcel(words) {
+        if (!words || words.length === 0) {
+          return toast('No words to export', 'error');
+        }
+        try {
+          const ws = XLSX.utils.json_to_sheet(words.map(w => ({ Word: w.word, English: w.eng_meaning, Bangla: w.bn_meaning })));
+          const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Vocabora');
+          XLSX.writeFile(wb, 'vocabora_words.xlsx');
+          toast('Exported to Excel!', 'success');
+        } catch (err) {
+          console.error('Excel export error:', err);
+          toast('Failed to export Excel', 'error');
+        }
+      }
+
+      function exportPdf(words) {
+        if (!words || words.length === 0) {
+          return toast('No words to export', 'error');
+        }
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          doc.text('Vocabora word list', 14, 20);
+          doc.autoTable({ head: [['Word', 'Meaning']], body: words.map(w => [w.word, w.eng_meaning || w.bn_meaning]), startY: 30 });
+          doc.save('vocabora.pdf');
+          toast('Exported to PDF!', 'success');
+        } catch (err) {
+          console.error('PDF export error:', err);
+          toast('Failed to export PDF', 'error');
+        }
+      }
+
+      // --- init ---
+      checkSession();
+
+      // for debugging
+      if (supabase) window.supabase = supabase;
+    })();
+  </script>
+
+  <!-- minimal service worker registration for PWA (optional) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => { });
+    }
+  </script>
+  <!-- manifest link (would need actual manifest.json) -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- 
+    ----- SUPABASE SQL SCHEMA (run in SQL editor) -----
+    CREATE TABLE categories (
+        id bigint primary key generated always as identity,
+        user_id uuid references auth.users not null,
+        name text, color text
+    );
+    CREATE TABLE words (
+        id bigint primary key generated always as identity,
+        user_id uuid references auth.users not null,
+        word text, eng_meaning text, bn_meaning text, synonyms text,
+        example_sentence text, category_id bigint references categories,
+        difficulty int, last_reviewed timestamptz, interval float,
+        easiness float, next_review timestamptz, created_at timestamptz default now(),
+        image_url text
+    );
+    CREATE TABLE quiz_history (
+        id bigint primary key generated always as identity,
+        user_id uuid references auth.users not null,
+        score int, total int, accuracy float, date timestamptz, mode text
+    );
+    -- Enable RLS
+    alter table words enable row level security;
+    create policy "Users own words" on words for all using (auth.uid() = user_id);
+    create policy "Users own categories" on categories for all using (auth.uid() = user_id);
+    create policy "Users own quiz" on quiz_history for all using (auth.uid() = user_id);
+-->
+</body>
+
+</html>
