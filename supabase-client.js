@@ -19,6 +19,10 @@ const db = {
           'Authorization': `Bearer ${SUPABASE_KEY}`
         }
       });
+      if (!response.ok) {
+        console.error('Error fetching words:', response.status, response.statusText);
+        return [];
+      }
       return await response.json();
     } catch (error) {
       console.error('Error fetching words:', error);
@@ -40,6 +44,10 @@ const db = {
           'Authorization': `Bearer ${SUPABASE_KEY}`
         }
       });
+      if (!response.ok) {
+        console.error('Error fetching word:', response.status, response.statusText);
+        return null;
+      }
       const data = await response.json();
       return data[0] || null;
     } catch (error) {
@@ -72,6 +80,10 @@ const db = {
           created_at: new Date().toISOString()
         })
       });
+      if (!response.ok) {
+        console.error('Error adding word:', response.status, response.statusText);
+        return null;
+      }
       return await response.json();
     } catch (error) {
       console.error('Error adding word:', error);
@@ -100,6 +112,10 @@ const db = {
           difficulty: wordData.difficulty || 1
         })
       });
+      if (!response.ok) {
+        console.error('Error updating word:', response.status, response.statusText);
+        return null;
+      }
       return await response.json();
     } catch (error) {
       console.error('Error updating word:', error);
@@ -110,13 +126,17 @@ const db = {
   // Delete word
   async deleteWord(id) {
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/words?id=eq.${id}`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/words?id=eq.${id}`, {
         method: 'DELETE',
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`
         }
       });
+      if (!response.ok) {
+        console.error('Error deleting word:', response.status, response.statusText);
+        return false;
+      }
       return true;
     } catch (error) {
       console.error('Error deleting word:', error);
@@ -136,6 +156,10 @@ const db = {
           }
         }
       );
+      if (!response.ok) {
+        console.error('Error fetching practice words:', response.status, response.statusText);
+        return [];
+      }
       return await response.json();
     } catch (error) {
       console.error('Error fetching practice words:', error);
@@ -153,7 +177,7 @@ const db = {
         ? { times_correct: (word.times_correct || 0) + 1 }
         : { times_incorrect: (word.times_incorrect || 0) + 1 };
 
-      await fetch(`${SUPABASE_URL}/rest/v1/words?id=eq.${wordId}`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/words?id=eq.${wordId}`, {
         method: 'PATCH',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -162,6 +186,10 @@ const db = {
         },
         body: JSON.stringify(updates)
       });
+      if (!response.ok) {
+        console.error('Error recording answer:', response.status, response.statusText);
+        return false;
+      }
       return true;
     } catch (error) {
       console.error('Error recording answer:', error);
@@ -238,6 +266,10 @@ const db = {
           'Authorization': `Bearer ${SUPABASE_KEY}`
         }
       });
+      if (!response.ok) {
+        console.error('Error checking word:', response.status, response.statusText);
+        return false;
+      }
       const data = await response.json();
       return data.length > 0;
     } catch (error) {
@@ -249,13 +281,17 @@ const db = {
   // Clear all words (for testing)
   async clearDatabase() {
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/words`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/words`, {
         method: 'DELETE',
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`
         }
       });
+      if (!response.ok) {
+        console.error('Error clearing database:', response.status, response.statusText);
+        return false;
+      }
       return true;
     } catch (error) {
       console.error('Error clearing database:', error);
@@ -265,4 +301,10 @@ const db = {
 };
 
 // Export for use in app
-window.vocabDb = db;
+try {
+  window.vocabDb = db;
+  console.log('supabase-client.js loaded successfully');
+  console.log('VocabDB initialized: success');
+} catch (e) {
+  console.error('Error initializing vocabDb:', e);
+}

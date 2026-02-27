@@ -2426,7 +2426,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Using Supabase backend -->
-  <script src="supabase-client.js"></script>
+  <script src="supabase-client.js" onerror="console.error('Failed to load supabase-client.js')"></script>
 
   <script>
     let currentPracticeWord = null;
@@ -2441,6 +2441,12 @@
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.toggle('active', content.id === tabName + '-tab');
       });
+
+      // Check if vocabDb is available before calling functions that need it
+      if (typeof vocabDb === 'undefined') {
+        console.error('vocabDb not loaded yet, please wait...');
+        return;
+      }
 
       if (tabName === 'home') {
         loadHomeStats();
@@ -2524,6 +2530,11 @@
     }
 
     async function loadHomeStats() {
+      if (typeof vocabDb === 'undefined') {
+        console.error('vocabDb not loaded yet');
+        return;
+      }
+
       // Show skeleton
       document.getElementById('total-words').innerHTML = '<div class="skeleton skeleton-text" style="width:50px;height:32px;display:inline-block;"></div>';
       document.getElementById('mastered-words').innerHTML = '<div class="skeleton skeleton-text" style="width:50px;height:32px;display:inline-block;"></div>';
@@ -2546,6 +2557,11 @@
     }
 
     async function loadRecentWords() {
+      if (typeof vocabDb === 'undefined') {
+        console.error('vocabDb not loaded yet');
+        return;
+      }
+
       const container = document.getElementById('recent-words');
       // Show skeleton
       container.innerHTML = getSkeletonHTML(3);
@@ -2576,6 +2592,11 @@
     }
 
     async function loadWords() {
+      if (typeof vocabDb === 'undefined') {
+        console.error('vocabDb not loaded yet');
+        return;
+      }
+
       const container = document.getElementById('words-list');
       // Show skeleton
       container.innerHTML = getSkeletonHTML(5);
@@ -3878,6 +3899,11 @@
     }
 
     async function loadStats() {
+      if (typeof vocabDb === 'undefined') {
+        console.error('vocabDb not loaded yet');
+        return;
+      }
+
       // Show skeleton
       const statsIds = ['stat-total', 'stat-correct', 'stat-incorrect', 'stat-accuracy'];
       statsIds.forEach(id => {
@@ -4048,6 +4074,22 @@
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // Give browser time to load scripts
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Wait for vocabDb to be available (in case script is still loading)
+      let retries = 0;
+      const maxRetries = 10;
+      while (typeof vocabDb === 'undefined' && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+
+      if (typeof vocabDb === 'undefined') {
+        console.error('Failed to load vocabDb - script may not be loaded');
+        return;
+      }
+
       try {
         await vocabDb.init();
 
