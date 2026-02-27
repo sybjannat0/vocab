@@ -1,10 +1,15 @@
 // Service Worker for VocaVera PWA
-const CACHE_NAME = 'vocab-pro-v2';
-const STATIC_CACHE = 'vocab-static-v2';
-const DYNAMIC_CACHE = 'vocab-dynamic-v2';
+const CACHE_NAME = 'vocab-pro-v3';
+const STATIC_CACHE = 'vocab-static-v3';
+const DYNAMIC_CACHE = 'vocab-dynamic-v3';
 
-// Get base path from current URL
-const BASE_PATH = self.location.pathname.replace(/\/[^\\]*$/, '').replace(/\/[^\/]*$/, '') || '/';
+// Get base path from current URL - handles subdirectories
+const getBasePath = () => {
+  const path = self.location.pathname;
+  const lastSlash = path.lastIndexOf('/');
+  return lastSlash <= 0 ? '/' : path.substring(0, lastSlash + 1);
+};
+const BASE_PATH = getBasePath();
 
 const ASSETS_TO_CACHE = [
   BASE_PATH,
@@ -138,7 +143,7 @@ async function networkFirstStrategy(request) {
     
     // Return offline fallback for navigation requests
     if (request.mode === 'navigate') {
-      return caches.match('/index.html');
+      return caches.match(BASE_PATH + 'index.html');
     }
     
     return new Response(JSON.stringify({ error: 'Offline' }), {
@@ -179,7 +184,7 @@ self.addEventListener('push', (event) => {
     vibrate: [100, 50, 100, 50, 100],
     data: { 
       dateOfArrival: Date.now(),
-      url: '/?tab=practice'
+      url: BASE_PATH + '?tab=practice'
     },
     actions: [
       { action: 'practice', title: 'Practice Now', icon: createIconDataUrl('▶', '#10b981') },
@@ -208,7 +213,7 @@ self.addEventListener('notificationclick', (event) => {
   
   if (event.action === 'practice') {
     event.waitUntil(
-      clients.openWindow('/?tab=practice')
+      clients.openWindow(BASE_PATH + '?tab=practice')
     );
   } else if (event.action === 'dismiss') {
     // Just close the notification
@@ -218,13 +223,13 @@ self.addEventListener('notificationclick', (event) => {
       clients.matchAll({ type: 'window' }).then((clientList) => {
         // If a window is already open, focus it
         for (const client of clientList) {
-          if (client.url === '/' && 'focus' in client) {
+          if (client.url.includes(BASE_PATH) && 'focus' in client) {
             return client.focus();
           }
         }
         // Otherwise open a new window
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          return clients.openWindow(BASE_PATH);
         }
       })
     );
@@ -268,4 +273,4 @@ function updateContent() {
   });
 }
 
-console.log('[SW] Service worker loaded');
+console.log('[SW] Service worker loaded, base path:', BASE_PATH);
