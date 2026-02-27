@@ -1,6 +1,6 @@
 // Supabase Client Configuration
 const SUPABASE_URL = 'https://qytvihtvxfkahwlzwpwp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dHZpaHR2eGZraGF3bHp3cHdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc0NzA1ODMsImV4cCI6MjA1MzA0NjU4M30.sb_publishable_cqPpE3S5aIpT232ciewnSg_s65xcUM9';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dHZpaHR2eGZrYWh3bHp3cHdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDA5MTAsImV4cCI6MjA4NzYxNjkxMH0.1RO_Vb68RSeP4AKmf2xiHJvWOWHm8tzm2xeQmERN9kk';
 
 // Database table helper - matches sql.js API
 const db = {
