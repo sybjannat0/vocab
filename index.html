@@ -2393,7 +2393,7 @@
             <span class="card-title">Share App</span>
           </div>
           <div style="text-align: center; padding: 20px 10px;">
-            <p style="color: #64748b; margin-bottom: 16px;">Scan to open VocaVera on your device</p>
+            <p style="color: #64748b; margin-bottom: 16px;">Scan to open Vocab Pro on your device</p>
             <div id="qrcode-container"
               style="display: inline-block; padding: 15px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15); margin-bottom: 16px;">
               <div id="qrcode"></div>
@@ -2484,8 +2484,8 @@
     function loadShareTab() {
       if (qrCodeGenerated) return;
 
-      // Get current URL
-      const url = window.location.href.split('?')[0];
+      // Fixed URL for QR code
+      const url = 'https://vocab-sage.vercel.app/';
       document.getElementById('share-link').value = url;
 
       // Show skeleton while generating QR
@@ -4074,6 +4074,8 @@
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
+      console.log('DOMContentLoaded fired');
+
       // Give browser time to load scripts
       await new Promise(resolve => setTimeout(resolve, 200));
 
