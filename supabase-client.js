@@ -76,12 +76,12 @@ const db = {
           category: category || 'General',
           difficulty: difficulty || 1,
           times_correct: 0,
-          times_incorrect: 0,
-          created_at: new Date().toISOString()
+          times_incorrect: 0
         })
       });
       if (!response.ok) {
-        console.error('Error adding word:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error adding word:', response.status, response.statusText, errorText);
         return null;
       }
       return await response.json();
