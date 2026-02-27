@@ -2425,8 +2425,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://sql.js.org/dist/sql-wasm.js"></script>
-  <script src="sql.js"></script>
+  <!-- Using Supabase backend -->
+  <script src="supabase-client.js"></script>
 
   <script>
     let currentPracticeWord = null;
@@ -2951,8 +2951,8 @@
       renderWords(filtered);
     }
 
-    function showWordDetail(id) {
-      const word = vocabDb.getWord(id);
+    async function showWordDetail(id) {
+      const word = await vocabDb.getWordAsync(id);
       if (word) {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -3000,7 +3000,7 @@
     const wordInput = document.getElementById('new-word');
     let duplicateWarningShown = false;
 
-    wordInput.addEventListener('input', function () {
+    wordInput.addEventListener('input', async function () {
       const typedWord = this.value.trim();
       if (typedWord.length < 2) {
         duplicateWarningShown = false;
@@ -3010,7 +3010,7 @@
       // Format the word the same way as in form submission
       const formattedWord = typedWord.charAt(0).toUpperCase() + typedWord.slice(1).toLowerCase();
 
-      const existingWord = vocabDb.wordExists(formattedWord);
+      const existingWord = await vocabDb.wordExistsAsync(formattedWord);
       if (existingWord && !duplicateWarningShown) {
         duplicateWarningShown = true;
         showDuplicateWarning(existingWord);
@@ -3068,7 +3068,7 @@
 
       // Check if word already exists (only for new words or when word changes)
       if (!editId) {
-        const existingWord = vocabDb.wordExists(word);
+        const existingWord = await vocabDb.wordExistsAsync(word);
         if (existingWord) {
           // Show modal to view existing word
           showExistingWordModal(existingWord);
@@ -3142,8 +3142,8 @@
     }
 
     // View word details
-    function viewWord(id) {
-      const word = vocabDb.getWord(id);
+    async function viewWord(id) {
+      const word = await vocabDb.getWordAsync(id);
       if (!word) return;
 
       const modal = document.createElement('div');
@@ -3189,8 +3189,8 @@
     }
 
     // Manage categories
-    function manageCategories() {
-      const stats = vocabDb.getStatistics();
+    async function manageCategories() {
+      const stats = await vocabDb.getStatistics();
       const categories = Object.keys(stats.wordsByCategory);
 
       const modal = document.createElement('div');
@@ -3245,15 +3245,15 @@
     }
 
     // Edit category name
-    function editCategory(oldCategory) {
+    async function editCategory(oldCategory) {
       const newCategory = prompt('Enter new name for category "' + oldCategory + '":');
       if (!newCategory || newCategory === oldCategory) return;
 
       // Get all words in this category and update them
-      const words = vocabDb.getAllWords();
-      words.filter(w => w.category === oldCategory).forEach(word => {
-        vocabDb.updateWord(word.id, { ...word, category: newCategory });
-      });
+      const words = await vocabDb.getAllWords();
+      for (const word of words.filter(w => w.category === oldCategory)) {
+        await vocabDb.updateWord(word.id, { ...word, category: newCategory });
+      }
 
       // Refresh
       loadStats();

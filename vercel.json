@@ -1,0 +1,6 @@
+{
+  "$schema": "https://vercel.com/schemas/vercel.json",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": "."
+}
