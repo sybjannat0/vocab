@@ -3213,7 +3213,7 @@
       // Directly load stats without skeleton to avoid flash
       const stats = await vocabDb.getStatistics();
       document.getElementById('total-words').textContent = stats.totalWords;
-      document.getElementById('mastered-words').textContent = stats.masteredWords;
+      document.getElementById('mastered-words').textContent = stats.mastered;
       document.getElementById('accuracy').textContent = stats.accuracy + '%';
     }
 
