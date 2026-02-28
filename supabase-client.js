@@ -268,13 +268,13 @@ const db = {
       });
       if (!response.ok) {
         console.error('Error checking word:', response.status, response.statusText);
-        return false;
+        return null;
       }
       const data = await response.json();
-      return data.length > 0;
+      return data.length > 0 ? data[0] : null;
     } catch (error) {
       console.error('Error checking word:', error);
-      return false;
+      return null;
     }
   },
 
