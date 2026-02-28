@@ -4037,7 +4037,7 @@
     // Load stats
     async function loadStats() {
       // Show skeleton
-      const statsIds = ['stat-mastered', 'stat-practiced', 'stat-easy', 'stat-hard'];
+      const statsIds = ['stat-mastered', 'stat-practiced', 'stat-easy', 'stat-hard', 'stat-total', 'stat-correct', 'stat-incorrect', 'stat-accuracy'];
       statsIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '<div class="skeleton skeleton-stat"></div>';
@@ -4048,18 +4048,22 @@
       const allWordsData = await vocabDb.getAllWords();
       const categoryStats = document.getElementById('category-stats');
 
-      // Update stat boxes
+      // Update basic stat boxes
+      document.getElementById('stat-total').textContent = stats.totalWords || 0;
+      document.getElementById('stat-correct').textContent = stats.totalCorrect || 0;
+      document.getElementById('stat-incorrect').textContent = stats.totalIncorrect || 0;
+      document.getElementById('stat-accuracy').textContent = (stats.accuracy || 0) + '%';
+
+      // Update difficulty stat boxes
       document.getElementById('stat-mastered').textContent = stats.mastered || 0;
 
       // Calculate practiced (words with at least 1 practice)
       const practiced = allWordsData.filter(w => (w.times_correct || 0) + (w.times_incorrect || 0) > 0).length;
       document.getElementById('stat-practiced').textContent = practiced;
 
-      // Count by difficulty
-      const easy = allWordsData.filter(w => w.difficulty === 1).length;
-      const hard = allWordsData.filter(w => w.difficulty === 3).length;
-      document.getElementById('stat-easy').textContent = easy;
-      document.getElementById('stat-hard').textContent = hard;
+      // Count by difficulty - use stats from getStatistics
+      document.getElementById('stat-easy').textContent = stats.easy || 0;
+      document.getElementById('stat-hard').textContent = stats.hard || 0;
 
       // Category stats
       if (Object.keys(stats.wordsByCategory).length === 0) {
@@ -4787,54 +4791,6 @@
         [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
       }
       return newArray;
-    }
-
-    async function loadStats() {
-      if (typeof vocabDb === 'undefined') {
-        console.error('vocabDb not loaded yet');
-        return;
-      }
-
-      // Show skeleton
-      const statsIds = ['stat-total', 'stat-correct', 'stat-incorrect', 'stat-accuracy'];
-      statsIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '<div class="skeleton skeleton-stat" style="display:inline-block;width:40px;height:24px;"></div>';
-      });
-      document.getElementById('category-stats').innerHTML = getSkeletonHTML(4);
-
-      const stats = await vocabDb.getStatistics();
-
-      document.getElementById('stat-total').textContent = stats.totalWords;
-      document.getElementById('stat-correct').textContent = stats.totalCorrect;
-      document.getElementById('stat-incorrect').textContent = stats.totalIncorrect;
-      document.getElementById('stat-accuracy').textContent = stats.accuracy + '%';
-
-      const categoryStats = document.getElementById('category-stats');
-
-      if (Object.keys(stats.wordsByCategory).length === 0) {
-        categoryStats.innerHTML = '<p style="color:#64748b;text-align:center;">No category data yet.</p>';
-      } else {
-        let html = '';
-
-        // Add manage categories button
-        html += '<button class="btn" onclick="manageCategories()" style="width:100%; margin-bottom:16px; padding:10px;"><i class="fas fa-cog"></i> Manage Categories</button>';
-
-        // Add category list
-        html += Object.entries(stats.wordsByCategory).map(([cat, count]) =>
-          '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #e2e8f0;">' +
-          '<span>' + cat + '</span>' +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<strong style="color:#6366f1;">' + count + '</strong>' +
-          '<button onclick="editCategory(' + "'" + cat.replace(/'/g, "\\'") + "'" + ')" style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;">' +
-          '<i class="fas fa-edit"></i>' +
-          '</button>' +
-          '</div>' +
-          '</div>'
-        ).join('');
-
-        categoryStats.innerHTML = html;
-      }
     }
 
     async function registerServiceWorker() {

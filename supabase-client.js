@@ -173,9 +173,22 @@ const db = {
       const word = await this.getWordAsync(wordId);
       if (!word) return;
 
+      const newTimesCorrect = correct ? (word.times_correct || 0) + 1 : word.times_correct || 0;
+      const newTimesIncorrect = correct ? word.times_incorrect || 0 : (word.times_incorrect || 0) + 1;
+
+      // Determine difficulty based on answer
+      // If incorrect → hard (difficulty = 3)
+      // If correct 2+ times → mastered/easy (difficulty = 1)
+      let newDifficulty = word.difficulty || 1;
+      if (!correct) {
+        newDifficulty = 3; // hard
+      } else if (newTimesCorrect >= 2) {
+        newDifficulty = 1; // easy/mastered
+      }
+
       const updates = correct 
-        ? { times_correct: (word.times_correct || 0) + 1 }
-        : { times_incorrect: (word.times_incorrect || 0) + 1 };
+        ? { times_correct: newTimesCorrect, difficulty: newDifficulty }
+        : { times_incorrect: newTimesIncorrect, difficulty: newDifficulty };
 
       const response = await fetch(`${SUPABASE_URL}/rest/v1/words?id=eq.${wordId}`, {
         method: 'PATCH',
@@ -208,10 +221,14 @@ const db = {
       const words = await this.getAllWords();
       
       const totalWords = words.length;
-      const masteredWords = words.filter(w => 
-        (w.times_correct || 0) >= 5 && 
-        ((w.times_correct || 0) / ((w.times_correct || 0) + (w.times_incorrect || 0))) >= 0.8
-      ).length;
+      // Mastered: 2+ correct answers, no incorrect
+      const masteredWords = words.filter(w => (w.times_correct || 0) >= 2 && (w.times_incorrect || 0) === 0).length;
+
+      // Hard: has at least 1 incorrect answer
+      const hardWords = words.filter(w => (w.times_incorrect || 0) > 0).length;
+
+      // Easy: has at least 1 correct answer, but no incorrect
+      const easyWords = words.filter(w => (w.times_correct || 0) >= 1 && (w.times_incorrect || 0) === 0).length;
 
       const totalCorrect = words.reduce((sum, w) => sum + (w.times_correct || 0), 0);
       const totalIncorrect = words.reduce((sum, w) => sum + (w.times_incorrect || 0), 0);
@@ -232,6 +249,8 @@ const db = {
         totalIncorrect,
         accuracy,
         mastered: masteredWords,
+        easy: easyWords,
+        hard: hardWords,
         wordsByCategory
       };
     } catch (error) {
@@ -243,6 +262,8 @@ const db = {
         totalIncorrect: 0,
         accuracy: 0,
         mastered: 0,
+        easy: 0,
+        hard: 0,
         wordsByCategory: {}
       };
     }
