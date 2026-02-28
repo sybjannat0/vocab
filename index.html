@@ -2758,11 +2758,6 @@
         <div class="filter-row">
           <select id="filter-category" onchange="applyFilters()">
             <option value="">All Categories</option>
-            <option value="General">General</option>
-            <option value="Academic">Academic</option>
-            <option value="Business">Business</option>
-            <option value="Technology">Technology</option>
-            <option value="Daily">Daily Use</option>
           </select>
 
           <select id="filter-difficulty" onchange="applyFilters()">
@@ -2844,11 +2839,6 @@
             <div class="form-group">
               <label>Category</label>
               <select id="new-category">
-                <option value="General">General</option>
-                <option value="Academic">Academic</option>
-                <option value="Business">Business</option>
-                <option value="Technology">Technology</option>
-                <option value="Daily">Daily Use</option>
               </select>
             </div>
             <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Word</button>
@@ -3273,7 +3263,67 @@
       container.innerHTML = getSkeletonHTML(5);
 
       allWords = await vocabDb.getAllWords();
+      await populateCategoryDropdowns();
       applyFilters();
+    }
+
+    async function populateCategoryDropdowns() {
+      try {
+        const stats = await vocabDb.getStatistics();
+        const categories = Object.keys(stats.wordsByCategory || {});
+
+        // Sort categories alphabetically
+        categories.sort();
+
+        // Default categories to always show
+        const defaultCategories = ['General', 'Academic', 'Business', 'Technology', 'Daily Use'];
+        const allCategories = [...new Set([...defaultCategories, ...categories])];
+
+        // Populate filter-category dropdown
+        const filterSelect = document.getElementById('filter-category');
+        if (filterSelect) {
+          const currentFilter = filterSelect.value;
+          filterSelect.innerHTML = '<option value="">All Categories</option>';
+          allCategories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat === 'Daily Use' ? 'Daily Use' : cat;
+            filterSelect.appendChild(option);
+          });
+          filterSelect.value = currentFilter;
+        }
+
+        // Populate new-category dropdown (for adding new words)
+        const newCategorySelect = document.getElementById('new-category');
+        if (newCategorySelect) {
+          const currentCategory = newCategorySelect.value;
+          newCategorySelect.innerHTML = '';
+          allCategories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat === 'Daily Use' ? 'Daily Use' : cat;
+            newCategorySelect.appendChild(option);
+          });
+          newCategorySelect.value = currentCategory || 'General';
+        }
+      } catch (error) {
+        console.error('Error populating category dropdowns:', error);
+      }
+    }
+
+    // Helper function to generate category options HTML for dynamic dropdowns
+    async function getCategoryOptions(selectedCategory) {
+      const stats = await vocabDb.getStatistics();
+      const categories = Object.keys(stats.wordsByCategory || {});
+      categories.sort();
+      const defaultCategories = ['General', 'Academic', 'Business', 'Technology', 'Daily Use'];
+      const allCategories = [...new Set([...defaultCategories, ...categories])];
+
+      return allCategories.map(cat => {
+        const label = cat === 'Daily Use' ? 'Daily Use' : cat;
+        const selected = cat === selectedCategory ? 'selected' : '';
+        return `<option value="${cat}" ${selected}>${label}</option>`;
+      }).join('');
     }
 
     function renderWords(words) {
@@ -3328,13 +3378,16 @@
     }
 
     // Edit word function - shows modal
-    function editWord(id) {
+    async function editWord(id) {
       const word = allWords.find(w => w.id === id);
       if (!word) return;
 
       // Remove existing modal if any
       const existingModal = document.getElementById('edit-modal');
       if (existingModal) existingModal.remove();
+
+      // Get category options
+      const categoryOptions = await getCategoryOptions(word.category);
 
       // Create modal
       const modal = document.createElement('div');
@@ -3355,11 +3408,7 @@
               <div class="form-group">
                 <label>Category</label>
                 <select id="edit-category">
-                  <option value="General" ${word.category === 'General' ? 'selected' : ''}>General</option>
-                  <option value="Academic" ${word.category === 'Academic' ? 'selected' : ''}>Academic</option>
-                  <option value="Business" ${word.category === 'Business' ? 'selected' : ''}>Business</option>
-                  <option value="Technology" ${word.category === 'Technology' ? 'selected' : ''}>Technology</option>
-                  <option value="Daily" ${word.category === 'Daily' ? 'selected' : ''}>Daily Use</option>
+                  ${categoryOptions}
                 </select>
               </div>
             </div>
@@ -5035,6 +5084,7 @@
 
         loadHomeStats();
         loadRecentWords();
+        await populateCategoryDropdowns();
       } catch (error) {
         console.error('Failed to initialize:', error);
       }
