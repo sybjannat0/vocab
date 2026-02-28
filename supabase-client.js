@@ -281,11 +281,13 @@ const db = {
   // Clear all words (for testing)
   async clearDatabase() {
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/words`, {
+      // Delete using a filter that matches all rows (id=gt.0 will match all positive IDs)
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/words?id=gt.0`, {
         method: 'DELETE',
         headers: {
           'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=minimal'
         }
       });
       if (!response.ok) {

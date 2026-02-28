@@ -444,45 +444,290 @@
 
     .word-actions {
       display: flex;
-      gap: 6px;
+      gap: 2px;
+      flex-shrink: 0;
+      align-items: center;
     }
 
     .action-btns {
       display: flex;
-      gap: 6px;
+      gap: 2px;
       justify-content: center;
     }
 
     .action-btn {
-      width: 28px;
-      height: 28px;
+      width: 18px;
+      height: 18px;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .action-btn.edit {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--primary);
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
     }
 
     .action-btn.edit:hover {
-      background: var(--primary);
-      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
 
     .action-btn.delete {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
     }
 
     .action-btn.delete:hover {
-      background: #ef4444;
-      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Mobile responsive styles */
+    @media (max-width: 480px) {
+
+      /* General */
+      body {
+        font-size: 14px;
+      }
+
+      .app-container {
+        padding: 12px;
+        padding-top: calc(12px + env(safe-area-inset-top));
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      }
+
+      /* Header */
+      .header {
+        padding: 12px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .stats-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .stat-pill {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      /* Tabs */
+      .tabs {
+        overflow-x: auto;
+        padding: 8px;
+        gap: 4px;
+      }
+
+      .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      /* Word Cards */
+      .word-card {
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .word-card .word-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .word-card .word {
+        font-size: 16px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .word-card .definition {
+        font-size: 12px;
+      }
+
+      .word-actions {
+        width: auto;
+        justify-content: flex-end;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      .action-btn {
+        width: 5px;
+        height: 5px;
+        font-size: 0;
+        padding: 0;
+      }
+
+      .speak-btn {
+        width: 5px;
+        height: 5px;
+        font-size: 0;
+        padding: 0;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+        padding: 16px;
+      }
+
+      .modal-footer .modal-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 15px;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 12px;
+      }
+
+      .form-group label {
+        font-size: 12px;
+      }
+
+      input,
+      select,
+      textarea {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      /* Modal */
+      .modal-content {
+        width: 95%;
+        margin: 10px;
+        padding: 16px;
+        max-height: 90vh;
+      }
+
+      .modal-header h2 {
+        font-size: 20px;
+      }
+
+      /* Practice */
+      .practice-card {
+        padding: 16px;
+      }
+
+      .practice-word {
+        font-size: 18px;
+      }
+
+      .flashcard-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .action-btn.wrong,
+      .action-btn.correct {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+      }
+
+      /* Stats */
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .stat-box {
+        padding: 16px;
+      }
+
+      /* Table */
+      .words-table {
+        font-size: 11px;
+      }
+
+      .words-table th,
+      .words-table td {
+        padding: 8px 4px;
+      }
+
+      /* Pull indicator */
+      #pull-indicator {
+        font-size: 12px;
+        padding: 10px 16px;
+      }
+
+      /* PIN screen */
+      .pin-container {
+        padding: 24px 16px;
+        margin: 10px;
+      }
+
+      .pin-keypad {
+        gap: 8px;
+      }
+
+      .pin-btn {
+        height: 56px;
+        font-size: 20px;
+      }
+
+      /* Offline notice */
+      .offline-notice {
+        padding: 8px;
+        font-size: 12px;
+      }
+
+      /* Modal header mobile */
+      .modal-header {
+        padding: 16px;
+        flex-wrap: wrap;
+      }
+
+      .modal-header h2 {
+        font-size: 18px;
+      }
+
+      .modal-header .modal-pronunciation {
+        font-size: 13px;
+      }
+
+      .modal-header .word-row {
+        flex-wrap: wrap;
+      }
+
+      .modal-header .speak-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+      }
+
+      .modal-header .modal-close {
+        top: 8px;
+        right: 8px;
+      }
+
+      .view-toggle {
+        display: none !important;
+      }
     }
 
     .word-card .definition {
@@ -928,20 +1173,57 @@
 
     .modal-header {
       background: var(--gradient);
-      padding: 24px;
-      border-radius: 24px 24px 0 0;
-      text-align: center;
+      padding: 20px 24px;
+      border-radius: 20px 20px 0 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100px;
+      justify-content: space-between;
+      position: relative;
+      gap: 12px;
+    }
+
+    .modal-header .word-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .modal-header h2 {
       color: white;
       margin: 0;
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .modal-header .speak-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .modal-header .speak-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .modal-header .modal-pronunciation {
+      color: rgba(255, 255, 255, 0.85);
+      margin: 2px 0 0 0;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: left;
     }
 
     .modal-header .modal-close {
@@ -950,6 +1232,20 @@
       right: 12px;
       background: rgba(255, 255, 255, 0.2);
       color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-header .modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
     }
 
     .form-actions {
@@ -1852,6 +2148,27 @@
       margin-top: 4px;
     }
 
+    .speak-btn.large {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s;
+    }
+
+    .speak-btn.large:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
     .modal-body {
       padding: 20px;
     }
@@ -1917,6 +2234,52 @@
       font-weight: 600;
       background: rgba(99, 102, 241, 0.15);
       color: var(--primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      background: #f8fafc;
+      border-radius: 0 0 20px 20px;
+    }
+
+    .modal-footer .modal-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .modal-footer .modal-btn.edit {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .modal-footer .modal-btn.edit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .modal-footer .modal-btn.delete {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .modal-footer .modal-btn.delete:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
     }
 
     .filter-row {
@@ -2018,13 +2381,21 @@
     }
 
     .words-table th {
-      background: #6366f1;
+      background: #6366f1 !important;
       color: white;
       padding: 14px;
       text-align: left;
       font-size: 12px;
       text-transform: uppercase;
       white-space: nowrap;
+    }
+
+    .words-table thead tr {
+      background: #6366f1 !important;
+    }
+
+    .words-table thead th {
+      background: #6366f1 !important;
     }
 
     .words-table td {
@@ -2620,6 +2991,21 @@
             </button>
           </div>
         </div>
+
+        <!-- Settings Section -->
+        <div class="card" style="margin-top: 16px;">
+          <div class="card-header">
+            <span class="card-title">Settings</span>
+          </div>
+          <div style="padding: 16px;">
+            <button class="btn" onclick="clearAllData()"
+              style="background: #ef4444; color: white; width: 100%; padding: 12px;">
+              <i class="fas fa-trash"></i> Clear All Data
+            </button>
+            <p style="color: #64748b; font-size: 12px; margin-top: 8px; text-align: center;">This will delete all words
+              and reset your progress</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2844,28 +3230,18 @@
                 <th>Bangla</th>
                 <th>Synonym</th>
                 <th>Example</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               ${words.map(word => `
-                <tr>
+                <tr onclick="showWordDetail(${word.id})" style="cursor:pointer;">
                   <td class="word-cell">
-                    <div class="word-with-speak">
-                      <span>${word.word}</span>
-                      <button class="speak-btn small" onclick="speakWord('${word.word}')" title="Speak"><i class="fas fa-volume-up"></i></button>
-                    </div>
+                    ${word.word}
                   </td>
                   <td>${word.definition ? word.definition.substring(0, 40) + (word.definition.length > 40 ? '...' : '') : '-'}</td>
                   <td>${word.bangla ? word.bangla.substring(0, 30) + (word.bangla.length > 30 ? '...' : '') : '-'}</td>
                   <td>${word.synonym ? word.synonym.substring(0, 30) + (word.synonym.length > 30 ? '...' : '') : '-'}</td>
                   <td>${word.example ? word.example.substring(0, 40) + (word.example.length > 40 ? '...' : '') : '-'}</td>
-                  <td>
-                    <div class="action-btns">
-                      <button class="action-btn edit" onclick="editWord(${word.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                      <button class="action-btn delete" onclick="deleteWord(${word.id})" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -2876,11 +3252,6 @@
           <div class="word-card" onclick="showWordDetail(${word.id})">
             <div class="word-header">
               <div class="word">${word.word}</div>
-              <div class="word-actions">
-                <button class="speak-btn" onclick="speakWord('${word.word}')" title="Speak"><i class="fas fa-volume-up"></i></button>
-                <button class="action-btn edit" onclick="editWord(${word.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                <button class="action-btn delete" onclick="deleteWord(${word.id})" title="Delete"><i class="fas fa-trash"></i></button>
-              </div>
             </div>
             <div class="definition">${word.definition}</div>
             <div class="meta">
@@ -3107,61 +3478,147 @@
         return matchesSearch && matchesCategory && matchesDifficulty;
       });
 
-      // Create modern HTML table for PDF
-      let tableHTML = `
-        <div style="padding: 20px; font-family: 'Segoe UI', 'Poppins', sans-serif; background: white;">
-            <div style="text-align: center; margin-bottom: 20px;">
-              <h1 style="color: #667eea; margin: 0 0 5px 0; font-size: 24px; font-weight: 700;">📚 VocaVera</h1>
-              <p style="color: #888; margin: 0; font-size: 12px;">Your Vocabulary Collection • Total: ${filtered.length} words</p>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 11px; border-radius: 10px; overflow: hidden; table-layout: fixed;">
-              <thead>
-                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                  <th style="padding: 12px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; white-space: nowrap;">#</th>
-                  <th style="padding: 12px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; white-space: nowrap;">Word</th>
-                  <th style="padding: 12px 10px; text-align: justify; font-weight: 600; font-size: 11px; text-transform: uppercase;">Definition</th>
-                  <th style="padding: 12px 10px; text-align: justify; font-weight: 600; font-size: 11px; text-transform: uppercase;">Bangla</th>
-                  <th style="padding: 12px 10px; text-align: justify; font-weight: 600; font-size: 11px; text-transform: uppercase;">Synonym</th>
-                  <th style="padding: 12px 10px; text-align: justify; font-weight: 600; font-size: 11px; text-transform: uppercase;">Example</th>
-                </tr>
-              </thead>
-              <tbody>
+      if (filtered.length === 0) {
+        alert('No words to export!');
+        return;
+      }
+
+      // Use jsPDF with autotable for better PDF generation
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      // Page dimensions (A4 landscape: 297 x 210 mm)
+      const pageWidth = 297;
+      const pageHeight = 210;
+      const margin = 5;
+      const usableWidth = pageWidth - (margin * 2);
+
+      // Title
+      doc.setFontSize(24);
+      doc.setTextColor(102, 126, 234);
+      doc.text('Vocab Pro', pageWidth / 2, 12, { align: 'center' });
+
+      doc.setFontSize(11);
+      doc.setTextColor(102, 102, 102);
+      doc.text(`Your Vocabulary Collection • Total: ${filtered.length} words`, pageWidth / 2, 18, { align: 'center' });
+
+      // Prepare table data
+      const tableData = filtered.map((w, i) => [
+        String(i + 1),
+        String(w.word),
+        String(w.definition || '-'),
+        String(w.bangla || '-'),
+        String(w.synonym || '-'),
+        String(w.example || '-')
+      ]);
+
+      // Calculate column widths proportionally
+      const colWidths = [
+        10,  // #
+        20,  // Word
+        50,  // Definition
+        45,  // Bangla
+        30,  // Synonym
+        50   // Example
+      ];
+
+      // Normalize to fit page
+      const totalColWidth = colWidths.reduce((a, b) => a + b, 0);
+      const scale = usableWidth / totalColWidth;
+      const scaledWidths = colWidths.map(w => w * scale);
+
+      // Generate table
+      doc.autoTable({
+        head: [['#', 'Word', 'Definition', 'Bangla', 'Synonym', 'Example']],
+        body: tableData,
+        startY: 24,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [102, 126, 234],
+          textColor: 255,
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [51, 51, 51],
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250]
+        },
+        columnStyles: {
+          0: { cellWidth: scaledWidths[0], halign: 'center' },
+          1: { cellWidth: scaledWidths[1], fontStyle: 'bold', textColor: [102, 126, 234] },
+          2: { cellWidth: scaledWidths[2] },
+          3: { cellWidth: scaledWidths[3], textColor: [118, 75, 162] },
+          4: { cellWidth: scaledWidths[4] },
+          5: { cellWidth: scaledWidths[5], fontStyle: 'italic' }
+        },
+        margin: { top: 24, right: margin, bottom: margin, left: margin },
+        styles: {
+          overflow: 'linebreak',
+          lineColor: [222, 226, 230],
+          lineWidth: 0.1,
+          cellPadding: 2
+        },
+        // Unicode support
+        didParseCell: function (data) {
+          if (data.column.index === 3 && data.section === 'body') {
+            // Bangla column - try to render Unicode
+            data.cell.styles.font = 'helvetica';
+          }
+        }
+      });
+
+      // Open print dialog with Unicode support
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Vocab Pro - Word List</title>
+          <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Poppins', 'Noto Sans Bengali', sans-serif; padding: 20px; font-size: 11px; }
+            .header-section { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #667eea; }
+            h1 { color: #667eea; font-size: 24px; margin-bottom: 5px; line-height: 1.2; }
+            .subtitle { color: #666; margin: 0; line-height: 1.4; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; }
+            th { background: #667eea; color: #ffffff; padding: 10px 8px; text-align: left; font-weight: 600; font-size: 9px; text-transform: uppercase; }
+            td { padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+            tr:nth-child(even) { background: #f8f9fa; }
+            .col-num { width: 30px; text-align: center; color: #000; }
+            .col-word { width: 80px; font-weight: 600; color: #000; }
+            .col-def { width: 140px; color: #000; }
+            .col-bangla { width: 120px; font-family: 'Noto Sans Bengali', sans-serif; color: #000; }
+            .col-syn { width: 80px; color: #000; }
+            .col-ex { width: 140px; font-style: italic; color: #000; }
+            @media print { body { padding: 10mm; } th { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #667eea !important; color: #ffffff !important; font-weight: 700 !important; } tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f8f9fa; } }
+          </style>
+        </head>
+        <body>
+          <div class="header-section">
+            <h1>📚 Vocavera</h1>
+            <p class="subtitle">Your Vocabulary Collection • Total: ${filtered.length} words</p>
+          </div>
+          <table>
+            <thead><tr><th class="col-num">#</th><th class="col-word">Word</th><th class="col-def">Definition</th><th class="col-bangla">Bangla</th><th class="col-syn">Synonym</th><th class="col-ex">Example</th></tr></thead>
+            <tbody>
+              ${filtered.map((w, i) => `<tr><td class="col-num">${i + 1}</td><td class="col-word">${w.word}</td><td class="col-def">${w.definition || '-'}</td><td class="col-bangla">${w.bangla || '-'}</td><td class="col-syn">${w.synonym || '-'}</td><td class="col-ex">${w.example || '-'}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
       `;
 
-      filtered.forEach((w, index) => {
-        const bgColor = index % 2 === 0 ? '#fafafa' : '#ffffff';
-        tableHTML += `
-          <tr style="background: ${bgColor};">
-            <td style="padding: 10px; border-bottom: 1px solid #eee; color: #888; white-space: nowrap;">${index + 1}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #667eea; white-space: nowrap;">${w.word}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee; color: #444; text-align: justify; word-wrap: break-word; white-space: normal; line-height: 1.4;">${w.definition || '-'}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee; color: #764ba2; text-align: justify; word-wrap: break-word; white-space: normal; line-height: 1.4;">${w.bangla || '-'}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666; text-align: justify; word-wrap: break-word; white-space: normal; line-height: 1.4;">${w.synonym || '-'}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666; font-style: italic; text-align: justify; word-wrap: break-word; white-space: normal; line-height: 1.4;">${w.example || '-'}</td>
-          </tr>
-        `;
-      });
-
-      tableHTML += '</tbody></table></div>';
-
-      // Create a temporary container
-      const container = document.createElement('div');
-      container.innerHTML = tableHTML;
-      container.style.width = '297mm';
-      container.style.tableLayout = 'fixed';
-      document.body.appendChild(container);
-
-      const opt = {
-        margin: 5,
-        filename: 'vocab-words.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-      };
-
-      html2pdf().set(opt).from(container).save().then(() => {
-        document.body.removeChild(container);
-      });
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 250);
     }
 
     function applyFilters() {
@@ -3202,12 +3659,15 @@
 
         modal.innerHTML = `
           <div class="modal-content">
-            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
-              <i class="fas fa-times"></i>
-            </button>
             <div class="modal-header">
-              <h2 class="modal-word">${word.word}</h2>
-              <p class="modal-pronunciation">${word.bangla}</p>
+              <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                <i class="fas fa-times"></i>
+              </button>
+              <div class="word-row">
+                <h2 class="modal-word">${word.word}</h2>
+                <button class="speak-btn" onclick="speakWord('${word.word}')" title="Speak"><i class="fas fa-volume-up"></i></button>
+              </div>
+              ${word.bangla ? `<p class="modal-pronunciation">${word.bangla}</p>` : ''}
             </div>
             <div class="modal-body">
               <div class="modal-section">
@@ -3226,8 +3686,13 @@
                 <p class="modal-text">${word.example}</p>
               </div>
               ` : ''}
-              <div class="modal-tags">
-                <span class="modal-tag category">${word.category}</span>
+              <div class="modal-footer">
+                <button class="modal-btn edit" onclick="editWord(${word.id}); this.closest('.modal-overlay').remove();">
+                  <i class="fas fa-pen"></i> Edit Word
+                </button>
+                <button class="modal-btn delete" onclick="deleteWord(${word.id}); this.closest('.modal-overlay').remove();">
+                  <i class="fas fa-trash"></i> Delete Word
+                </button>
               </div>
             </div>
           </div>
@@ -3654,7 +4119,7 @@
             synonym = formatSynonyms(synonym);
 
             // Add to database
-            vocabDb.addWord(word, definition, example, '', category, 1, bangla, synonym);
+            vocabDb.addWord(word, definition, example, synonym, category, 1, bangla, '');
             importedCount++;
           }
         }
@@ -4311,6 +4776,8 @@
 
       // PIN Authentication
       const CORRECT_PIN = '179084';
+      const SESSION_KEY = 'vocab_pro_authenticated';
+      const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
       let enteredPin = '';
 
       const pinScreen = document.getElementById('pin-screen');
@@ -4318,6 +4785,37 @@
       const pinDots = document.querySelectorAll('.pin-dot');
       const pinError = document.getElementById('pin-error');
       const pinButtons = document.querySelectorAll('.pin-btn');
+
+      // Check for existing session
+      function checkExistingSession() {
+        const sessionData = localStorage.getItem(SESSION_KEY);
+        if (sessionData) {
+          try {
+            const { timestamp } = JSON.parse(sessionData);
+            const elapsed = Date.now() - timestamp;
+            if (elapsed < SESSION_DURATION) {
+              // Session is valid
+              pinScreen.style.display = 'none';
+              appContainer.style.display = '';
+              initializeApp();
+              return true;
+            } else {
+              // Session expired
+              localStorage.removeItem(SESSION_KEY);
+            }
+          } catch (e) {
+            localStorage.removeItem(SESSION_KEY);
+          }
+        }
+        return false;
+      }
+
+      // Check session on load
+      if (!checkExistingSession()) {
+        // Show PIN screen
+        pinScreen.style.display = '';
+        appContainer.style.display = 'none';
+      }
 
       function updatePinDisplay() {
         pinDots.forEach((dot, index) => {
@@ -4338,6 +4836,8 @@
 
       function checkPin() {
         if (enteredPin === CORRECT_PIN) {
+          // Save session to localStorage
+          localStorage.setItem(SESSION_KEY, JSON.stringify({ timestamp: Date.now() }));
           pinScreen.style.display = 'none';
           appContainer.style.display = '';
           initializeApp();
@@ -4396,6 +4896,22 @@
         loadHomeStats();
         loadRecentWords();
         alert('All words have been deleted.');
+      }
+    }
+
+    // Function to clear all data (words and progress)
+    function clearAllData() {
+      if (confirm('Are you sure you want to clear ALL data? This will delete all words and reset all progress. This cannot be undone!')) {
+        try {
+          vocabDb.clearDatabase();
+        } catch (e) {
+          console.log('Clearing local data only');
+        }
+        allWords = [];
+        loadHomeStats();
+        loadRecentWords();
+        loadWords();
+        alert('All data has been cleared.');
       }
     }
   </script>
